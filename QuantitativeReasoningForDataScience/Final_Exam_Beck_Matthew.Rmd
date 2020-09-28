@@ -1,0 +1,363 @@
+---
+title: "State of Vaccination Rates in California School Districts"
+author: "Matt A. Beck"
+date: "9/10/2020"
+output: pdf_document
+fig_width: 6
+fig_height: 4
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(pander)
+library(corrplot)
+library(BayesFactor)
+library(BEST)
+library(MCMCpack)
+library(bcp)
+library(changepoint)
+library(BaylorEdPsych)
+library(car)
+options(scipen = 999) # Turn off scientific notation, previous knowledge
+
+```
+
+## Introduction
+
+
+This report includes analysis of three datasets, which includes:
+
+* Time series data from the World Health Organization reporting vaccination rates in the U.S. for five common vaccines
+* A list of California kindergartens and whether they reported vaccination data to the state in 2013
+* A sample of California public school districts from the 2013 data collection, along with specific numbers and percentages for each district.
+
+### Author's Note
+
+Auxillary research of CDC vaccination history (https://www.cdc.gov/mmwr/preview/mmwrhtml/su6004a9.htm) and actuals from the World Health Organization (https://apps.who.int/immunization_monitoring/globalsummary/coverages?c=USA) lends credence to the notion that the datasets used for this analysis should be considered purely as directional - data quality for the 1980's in particular is difficult, given the lack of reliable coverage data from the period, and that more robust survey results on vaccinations did not become available until around 1995. Most glaring in the WHO data are the low coverage rates for Hepatitis B, for which the CDC reports "By 2000, at least 90% of infants were being vaccinated annually."
+
+```{r, include=FALSE}
+# Insert Initial Data
+load("C:\\Users\\mbeck\\Google Drive\\IST 772\\Final Exam\\usVaccines.RData")
+# All School Reporting
+load("C:\\Users\\mbeck\\Google Drive\\IST 772\\Final Exam\\allSchoolsReportStatus.RData")
+# Custom Dataset
+load("C:\\Users\\mbeck\\Downloads\\districts4.RData")
+```
+
+
+## Executive Summary
+
+Looking across the last several decades, vaccination rates at a national level have largely remained above 90%, with Hepatitis B as the lone exception. Changes in vaccination rates are examined, revealing the Flu vaccine to be the most actively fluctuating. Vaccination reporting rates between public and private schools at the national level are also examined, indicating private schools report vaccination rates at a significantly lower proportion than public schools. California falls below the national average in vaccination rates across all of the vaccines in the standard array, with the exception of Hepatitis B. Vaccination rates from one vaccine type to another are highly correlated, indicating that if a person receives one vaccine, it is almost certain they will receive or have received all of the vaccines present in the dataset.
+
+Varying methods of statistical analysis are used to examine the relationship between reporting completion, reported vaccination completion rates, and belief-based exemption rates across California school districts using an array of available demographic variables. These variables include the percentage of reported children in poverty, percentage of students receiving free meals, percentage of family poverty, and a ratio of enrolled students to schools in a given district. These analyses indicate potential relationships between:
+
+* Vaccination reporting completion and the ratio of students per school in the district
+* Reported Vaccination rates and both in-district free meal eligibility and student to school ratio (positive relationship)
+* Belief-based Exemptions and children under the poverty level in the district (positive relationship), in-district free meal eligibility and student to school ratio (negative relationship)
+
+The evidence taken together, it is recommended our state legislator allocate financial assistance to school districts in rural areas with high proportions of individuals (especially children) who are under the poverty level.
+
+## US Vaccination Rates over Time
+
+Vaccination efforts in the United States from the 80's through 2017 can generally be characterized as a success, with many of the measured vaccination rates remaining in the low 90 percent range through the majority of the period. 
+```{r,echo=FALSE,fig.height = 4, fig.width = 4,fig.align = "center"}
+# How have U.S. vaccination rates varied over time? 
+### Now Overall converging around 90% and above, previously you saw a few dips in vaccinations. HepB has seen a rise, but recently fallen back down.
+
+# Plot Time Series of Vaccinations
+plot(usVaccines
+     , plot.type='s'
+     , col=1:5
+     , lty=1:5
+     , main='US Vaccination Rates - 1980 - 201'
+     ,xlab = "Year"
+     ,ylab='Vaccination Rates'
+     ,cex.lab=0.8)
+legend("bottomright"
+       , legend=c("DTP1", "HepB-BD","Pol3","Hib3","MCV1")
+       , col=1:5
+       , lty=1:5
+       , cex=0.8)
+```
+
+In terms of success, the DTP1 vaccine (shown in the chart above in black), has steadily risen from a low of ~80% in 1989 and remained above 90 percent through at least 2017, placing the highest among the vaccines tracked in the data. Polio, Influenza, and Measles all fall in the high 80 to low 90 percent range, and barring a dip in Flu around 2009, have either risen or remained fairly steady from 1995 onwards. Less successful is Hepatitis B, underwent a significant increase in adoption in the early 2000's, but recently peaked near 70% adoption. 
+
+### Vaccine Coverage Volatity
+
+```{r,echo=FALSE,fig.height = 4, fig.width = 4,fig.align = "center"}
+# Plot out charts
+dusVaccines <- diff(usVaccines)
+plot(dusVaccines,main="Differenced Vaccination Rates (US)")
+```
+
+Plotting the year-over-year differences of vaccination coverage helps to better capture the variation in coverage rates, where above it's clear that some vaccines experience more notable changes in coverage than others. Analysis of changepoints in the provided data produced the following:
+
+```{r,echo=FALSE,fig.height = 4, fig.width = 4,fig.align = "center"}
+# Conducting Changepoint Analysis
+
+# Plot changepoints for Diphtheria/Pertussis/Tetanus Vaccine
+cptVarOut1 <- cpt.var(dusVaccines[,1],method='PELT')
+#cptVarOut1
+#plot(cptVarOut1,main='Diphtheria/Pertussis/Tetanus Vaccine',ylab='Index')
+# Plot changepoints for Heptatitis B, Birth Dose
+cptVarOut2 <- cpt.var(dusVaccines[,2],method='PELT')
+#cptVarOut2
+#plot(cptVarOut2,main='Heptatitis B, Birth Dose',ylab='Index')
+# Plot changepoints for Polio Third Dose
+cptVarOut3 <- cpt.var(dusVaccines[,3],method='PELT')
+#cptVarOut3
+#plot(cptVarOut3,main='Polio Third Dose',ylab='Index')
+# Plot changepoints for Influenza Third Dose
+cptVarOut4 <- cpt.var(dusVaccines[,4],method='PELT')
+#cptVarOut4
+plot(cptVarOut4,main='Influenza Third Dose',ylab='Index')
+# Plot changepoints for Measles First Dose
+cptVarOut5 <- cpt.var(dusVaccines[,5],method='PELT')
+#cptVarOut5
+#plot(cptVarOut5,main='Measles First Dose',ylab='Index')
+
+
+# Run BCP on flu data to confirm results
+bcpFlu <- bcp(as.vector(usVaccines[,4]))
+plot(bcpFlu,outer.margins = list(left = unit(4,"lines"), bottom = unit(3, "lines"), right = unit(3, "lines"), top = unit(2,"lines")), main=NULL)
+```
+
+Of all the vaccines measured, the Influenza vaccine produced the most changepoints, indicating that this vaccine has the greatest volatility in coverage. Bayesian analysis of this volatility indicated that there is a high probability (virtually at 100%) of changepoints in year-over-year differences occuring 4 times in the recorded data, illustrated by the provided chart of posterior means and associated probabilities.
+
+```{r, include=FALSE}
+# Placeholder to indicate further analysis taken but not used in the report.
+
+# Which vaccination has the highest rate at the conclusion of the time series? Lowest / Which vaccination has the lowest rate at the conclusion of the time series? 
+### DPT1 at 98% / HepB_BD at 64%
+
+#pander(usVaccines[34,],caption="2013 Vaccination Rates")
+#Are vaccination rates increasing or decreasing?
+### For the most part they're currently remaining stagnant, though some are declining
+
+#dusVaccines <- diff(usVaccines)
+# Take Summary to see lows and highs
+#pander(summary(dusVaccines))
+
+# Which vaccine has the greatest volatility? 
+### Flu, with 4 changepoints over the given period above 95% confidence
+
+```
+
+## Proportions of Vaccination Data Reporting
+
+```{r, echo=FALSE,fig.height = 4, fig.width = 4,fig.align = "center"}
+# Create contingency table of results in order to run Chi Squared Analysis and determine if there is a credible difference between reporting for these
+SchoolReportMF <- ftable(allSchoolsReportStatus, row.vars=2, col.vars="reported")
+pander(SchoolReportMF,caption="Schools by Reporting Status - Public and Private")
+
+# Calculate proportions for each
+
+# Proportion of Private schools that reported vaccination data
+## 85%
+#round(SchoolReportMF[1,2]/(SchoolReportMF[1,1]+SchoolReportMF[1,2]),2)
+# Proportion of Public schools that reported vaccination data
+## 97%
+#round(SchoolReportMF[2,2]/(SchoolReportMF[2,1]+SchoolReportMF[2,2]),2)
+
+# Overall proportions
+#report_props <- SchoolReportMF/margin.table(SchoolReportMF)
+#pander(report_props,caption="Overall Reporting Proportions - Public and Private")
+```
+### Proportion of Public Schools reporting vaccination data: 97%
+
+### Proportion of Private Schools reporting vaccination data: 85%
+
+Reporting rates for both public and private schools in California were analyzed to determine whether a credible difference existed in reporting rates. To make this determination, two primary methods of statistical analyis were used (frequentist and Bayesian). This is true of all proceeding analysis.
+
+### Significance Testing on Difference in Proportions
+
+```{r, echo=FALSE,fig.height = 4, fig.width = 4,fig.align = "center"}
+#Was there any credible difference in overall reporting proportions between public and private schools? 
+## Yes, indicated by p-values from a frequentist and Bayesian testing suite
+# Run frequentist Chi-Squared test on these values
+chisq.test(SchoolReportMF, correct=FALSE)
+
+# Calculate Bayes Factor
+# Run the contingency table now
+ctBFout <- contingencyTableBF(SchoolReportMF,sampleType="poisson",posterior=FALSE)
+ctBFout
+
+# Running command with posterior sampling
+ctMCMCout <- contingencyTableBF(SchoolReportMF,sampleType="poisson",posterior=TRUE,iterations=10000)
+summary(ctMCMCout)
+
+PrivateProp <- ctMCMCout[,"lambda[1,1]"]/ctMCMCout[,"lambda[1,2]"]
+mean(PrivateProp)
+PublicProp <- ctMCMCout[,"lambda[2,1]"]/ctMCMCout[,"lambda[2,2]"]
+mean(PublicProp)
+diffProp <- PrivateProp - PublicProp
+hist(diffProp, main="Likely Difference in Vaccination Reporting - Private v. Public Schools")
+mean(diffProp)
+abline(v=quantile(diffProp,c(0.025)), col="black")
+abline(v=quantile(diffProp,c(0.975)), col="black")
+```
+
+The first statistical test produced a Chi-Squared value of 402.97, which has an associated p-value of well well below .001. Were there no difference in reporting proportion between public and private schools, one would expect a Chi-Squared value close to 1 (the associated degrees of freedom). The probability of getting a result of ~403 (or p-value of <.001) is so low that it is well outside any reasonable threshold to believe that is true (otherwise said that the null hypothesis should be kept). Thus it does appear that these proportions are significantly different from one another.
+
+The second statistical test generated a value (known as a Bayes Factor) greater than 1 trillion, which can be interpreted to mean the odds that this difference in proportions would be found in a population are even above 1,000,000,000,000 to 1 - virtually irrefutable evidence that public school vaccination reporting rates are not the same as those in private schools in the wider population of public and private schools in California. The difference in proportions is 95% likely to be between 13 and 18, with the most likely value near 15. 
+
+## Vaccination Rates in CA vs. US
+Comparison the mean (average) values from California data in 2013
+```{r, echo=FALSE,fig.height = 4, fig.width = 4,fig.align = "center"}
+# Reload data for this portion
+load("C:\\Users\\mbeck\\Downloads\\districts4.RData")
+# Convert reported missing vaccinations to higher %'s
+districts$WithDTP <- 100-districts$WithoutDTP
+districts$WithPolio <- 100-districts$WithoutPolio
+districts$WithMMR <- 100-districts$WithoutMMR
+districts$WithHepB <- 100-districts$WithoutHepB
+# Make a dataframe for just "With Vaccine" Values
+district_cor <- districts[,c(14,15,16,17)]
+pander(summary(district_cor,digits=0),caption="Measures of Centrality and Dispersion - CA Vaccination Coverage 2013")
+
+```
+and the WHO data on US Vaccination Coverage in 2013
+```{r, echo=FALSE}
+# Review of US Vaccination Rates
+pander(usVaccines[34,],caption="US Vaccination Coverage - 2013")
+```
+
+indicates that California Vaccination Rates (in 2013):
+
+* Rank below the national average in DTP (8 points below)
+* Rank below the national average in Polio (3 points below)
+* Rank below the national average in Measles (2 points below)
+* Ranks well above the national average in Hepatitis B (28 points above)
+
+## How are Vaccination Rates related?
+
+```{r, echo=FALSE,fig.height = 4, fig.width = 4,fig.align = "center"}
+
+# Show a correlation matrix for these variables
+cor_matrix <- cor(district_cor)
+res <- round(cor_matrix,2)
+pander(res)
+corrplot(res, type = "upper", order = "hclust", 
+         tl.col = "black", tl.srt = 45)
+```
+
+There is a very strong relationship (correlation) between receiving one vaccine and receiving others. The plot and table above show very high correlation values for vaccination rates (closer to 1 indicates higher strength of relationship), indicating that it's virtually a given that a child with one vaccine has already received the others. This reflects the fact that infant vaccinations are often distributed in short succession of one another, if not simultaneously. The opposite is then also true - if a student is missing one vaccine, it is very likely they are missing the remainder.
+
+## Which predict district's reporting was complete or not?
+
+Turning attention now to what demographic data can help inform whether a district will provide complete vaccination reporting:
+```{r, echo=FALSE,fig.height = 4, fig.width = 4,fig.align = "center"}
+#str(districts)
+
+# Data pre-processing
+#districts_raw = districts
+# Convert enrolled student counts and total schools to % of totals to conform with remaining
+#districts$Enrolled <- (districts$Enrolled/sum(districts$Enrolled))*100
+#districts$TotalSchools <- (districts$TotalSchools/sum(districts$TotalSchools))*100
+# Create variable to account for interaction b/w enrolled students and total schools
+districts$school_student_ratio <- round(districts$Enrolled/districts$TotalSchools,2)
+
+# Run Frequentist Model with associated results
+glmOut <- glm(DistrictComplete ~ PctChildPoverty + PctFreeMeal + PctFamilyPoverty + school_student_ratio, data=districts, family=binomial())
+summary(glmOut)
+# Transforming into log odds
+exp(coef(glmOut))
+# Pulling confidence intervals
+exp(confint(glmOut))
+# Generating an 'omnibus' measure for model quality
+#anova(glmOut, test='Chisq')
+# Running Pseudo R Squared
+PseudoR2(glmOut)
+# Running Bayesian Version
+set.seed(314)
+# Bayesian Method
+bayesLogitOut <- MCMClogit(formula = DistrictComplete ~ PctChildPoverty + PctFreeMeal + PctFamilyPoverty + school_student_ratio, data = districts)
+summary(bayesLogitOut) # Summarize the results
+
+# Converting to log odds
+exp(mean(bayesLogitOut[,"school_student_ratio"]))
+exp(quantile(bayesLogitOut[,"school_student_ratio"],c(0.025)))
+exp(quantile(bayesLogitOut[,"school_student_ratio"],c(0.975)))
+
+```
+
+Through analysis of the summarized outputs of a model predicting reporting completion by the district and a summary of district demographics, we conclude the following:
+
+* The p-values for percentage of children in poverty, children receiving free meals, and families in poverty in the district are all above *.05*, and therefore do not allow us to reject the null hypothesis for this model at an alpha threshold of .95, indicating that they do not add predictive power to the model. Because omitting them from the model reduces measures for predictive power (Nagelkirk Pseudo R-Squared decrease from .05 to .01), they will remain in the model.
+
+* However, a calculated ratio of students per school (meant to approximate the values of enrolled student count and total schools) has a p-value 
+below *.001*, which is  evidence in favor of rejecting the null hypothesis, suggesting the ratio of students to schools in the district adds predictive power to this model.
+
+In terms of log odds, there appears to be a very slight *1.01:1* change in odds for each increase in student school ratio, indicating that there is a virtually negligible effect of student to school ratio on the likelihood of a district completing their reporting. 
+
+Bayesian analysis further allows us to conclude with 95% confidence that the effect of student-to-school ratio on the log odds of a district's reporting completion is an increase between *.002 - .019%*, with the most likely value calculated around *.01*.
+
+The status quo model generated a Nagelkerke pseudo-R-squared value of *0.05*. Used as a loose replacement for an adjusted R-squared value in a typical linear regression, this roughly speaking says that the given model can explain about 6% of the variance predicting district completion. 
+
+Overall is clear that the provided data does not offer conclusive evidence that any of these district demographics substantively impact vaccination reporting rates. 
+
+## What variables predict the percentage of all enrolled students with completely up-to-date vaccines?
+
+```{r, echo=FALSE,fig.height = 4, fig.width = 4,fig.align = "center"}
+# Run Frequentist Model with associated results
+lmOut <- lm(PctUpToDate ~ PctChildPoverty + PctFreeMeal + PctFamilyPoverty + school_student_ratio, data=districts)
+# Checking against other model
+#lmOut <- lm(PctUpToDate ~ PctChildPoverty + PctFreeMeal + PctFamilyPoverty, data=districts)
+# Review Results
+summary(lmOut)
+# Run variance inflation
+pander(vif(lmOut))
+
+# Definitely some sort of relationship between the three, but not high enough to warrant further transformation.
+
+# Run Bayesian Model
+lmOut2 <- lmBF(PctUpToDate ~ PctChildPoverty + PctFreeMeal + PctFamilyPoverty + school_student_ratio, data=districts)
+# Review Results
+summary(lmOut2)
+```
+
+
+This model produced a  value for R-squared of *0.1339*, with an F-test *F(4, 695)=28.01, p< 0.00000000000000022*, providing reasonably strong evidence to reject the null hypothesis that R-squared was equal to zero - all this to say, this model can be used to estimate the effect of the provided demographic factors on percentage of students with full vaccinations The low R-squared value (closer to 0 than 1) does indicate this model's predicted effects should be further explored in subsequent analysis, as it is unable to explain more than ~13 of the variation in the data.
+
+Significant Variables:
+
+* Percentage of Students who use the free meals program (positive effect)
+* School-to-Student ratio (positive effect)
+
+The resulting Bayes Factor - Well above *1 Trillion* - strongly favors a model that includes these variables to predict the percentage of students with full vaccinations over a model without these factors. 
+
+These results certainly add import to the conclusion that districts with higher numbers of students eligible for free meals, and higher volume of students, possess a higher percentage of students with up-to-date vaccines, based on the positive coefficients on these variables and the strong indicators that these factors possess some predictive power.
+
+## What variables predict the percentage of all enrolled students with belief exceptions?
+
+```{r, echo=FALSE,fig.height = 4, fig.width = 4,fig.align = "center"}
+# Run Frequentist Model with associated results
+lmOut <- lm(PctBeliefExempt ~ PctChildPoverty + PctFreeMeal + PctFamilyPoverty + school_student_ratio, data=districts)
+# Review Results
+summary(lmOut)
+# Run variance inflation
+pander(vif(lmOut))
+# Run Bayesian Model
+lmOut2 <- lmBF(PctBeliefExempt ~ PctChildPoverty + PctFreeMeal + PctFamilyPoverty + school_student_ratio, data=districts)
+# Review Results
+summary(lmOut2)
+```
+
+This model produced a considerably high value for R-squared of *0.8148*, with an F-test *F(4, 695)=30.57, p<0.00000000000000022*, once again providing reasonably strong evidence to reject the null hypothesis that R-squared was equal to zero, and that this model can be used to estimate the effect of the provided demographic factors on the percentage of students with religious belief exemptions.
+Significant Variables:
+
+* Percentage of children in the district living below the poverty line (positive effect)
+* Percentage of students who are eligible for free meals (negative effect) 
+* School-to-Student ratio (negative effect)
+
+The resulting Bayes Factor - Well above *1 Trillion* - again strongly favors a model that includes these variables to predict the percentage of students with religious belief exemptions over a model without these factors. 
+
+## Summary of Findings
+
+When considered in concert, there are definite indicators of a tale of two districts - one in an urban center, where access and proximity to healthcare is abundant, and that of a more remote rural location, where the nearest hospital is many miles away. Initial modeling showed that only a proxy measure for population had any significance in predicting district reporting completion (school/student ratio), and measures of poverty and food scarcity combined with higher enrolled student counts (think: city) show a positive relationship with up-to-date vaccination rates. In contrast, higher rates of belief exemptions to vaccination appeared to be related to areas with consistent levels of poverty, but fewer students (think: rural). 
+
+Above all, it is recommended additional data be gathered on the rural and urban splits in these districts to confirm the indicators in the provided data. Assuming these findings can be corroborated, it is then recommended that the legislator allocate financial assistance to rural areas with high concentrations of students below the poverty level.
+
+
+
