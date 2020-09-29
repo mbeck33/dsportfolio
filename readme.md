@@ -1,5 +1,5 @@
 ## Matthew A. Beck
-# Graduation Candidate @ Syracuse University, M.S., Applied Data Science
+# Graduate Candidate @ Syracuse University, M.S., Applied Data Science
 
 3852368534
 
@@ -29,13 +29,14 @@ In my tenure as a student of the Applied Data Science program at Syracuse Univer
     - Written Portfolio Milestone Report
 
 4. Referenced Course Projects and Assignments
-    * [Project 1](LINK)
-    
-    * [Project 2](LINK)
-    
-    * [Project 3](LINK)
-   
-    * [Project 4](LINK)
+    * [Metrics Engine](https://github.com/mbeck33/dsportfolio/blob/master/DBManagement/Matthew_Beck_IST_659_Project_Deliverable.docx)
+    * [US State Interventions and their effects on COVID-19](https://github.com/mbeck33/dsportfolio/blob/master/ScriptingForDataAnalysis/Final_Project_Matthew_Beck.pptx)
+    * [Sticks Kebab Customer Segmentation](https://github.com/mbeck33/dsportfolio/blob/master/MarketingAnalytics/Team1Homework1.pptx)
+    * [Process Improvement Project – Reducing Survey Creation Time](https://github.com/mbeck33/dsportfolio/blob/master/DataAnalysis/Matthew_Arlen_Beck_Process_Improvement_Project.pptx)
+    * [Total Dissolved Solids (TDS) Removal – Analysis of possible effects of Biofilm treatment](https://github.com/mbeck33/dsportfolio/blob/master/QuantitativeReasoningForDataScience/Beck_Midterm.docx)
+    * [Hops and Hatha Image Recognition](https://github.com/mbeck33/dsportfolio/blob/master/BigDataAnalytics/IST-718%20Big%20Data%20Analytics%20-%20Final%20Project%20Presentation.pdf)
+    * [Lessons from the Past Poster](https://github.com/mbeck33/dsportfolio/blob/master/InformationVisualization/Final%20Project.pdf)
+    * [State of Vaccination Rates in California School Districts Report](https://github.com/mbeck33/dsportfolio/blob/master/QuantitativeReasoningForDataScience/Final_Exam_Beck_Matthew.pdf)
   
 5. [Portfolio Presentation]([GH PRESENTATION LINK])
     - Video file presenting the Portfolio Milestone
