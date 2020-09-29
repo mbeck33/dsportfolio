@@ -1,0 +1,72 @@
+---
+title: "Sticks Kebab Shop Segmentation"
+author: "Team 1"
+date: "4/12/2020"
+output: powerpoint_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(readxl)
+library(tidyr)
+fname = "C:\\Users\\mbeck\\Google Drive\\MAR 653\\Homework\\M0866Xv1hw1assignmentfile.xlsx"
+segmentation_data <- read_excel(fname,sheet="data for segmentation")
+# Omit NULL Responses
+seg_data_wip <-na.omit(segmentation_data)
+colnames(seg_data_wip)[3:6] <-c("careful_planner","spender","local_oriented","health_oriented")
+
+```
+
+## How do people choose a fast food restaurant to visit?
+
+- What is important, location, price, assortment, or cuisine?
+- Who are Stick's customers, and what are their motivations for visting sticks?
+- What does the survey data tell us about differences between customers and
+Noncustomers?
+
+- What survey questions would you use to identify the customer segments?
+
+## How many customer segments can you estimate from the survey data?
+
+- What are the profiles of the customer segments?
+- Which customer segments should Sticks target?
+- Bullet 3
+
+## Recommendation for the location of the next Sticks Kebob Shop 
+
+- based on the segmentation analysis and the demographic profiles of the locations provided.
+
+
+
+```{r cars, echo = TRUE}
+summary(cars)
+```
+
+## Determining the optimal number of clusters
+
+```{r pressure}
+
+# Determine optimal number of clusters
+k.max <- 8
+data <- seg_data_wip
+wss <- sapply(1:k.max, 
+              function(k){
+                kmeans(data, k, nstart=500,iter.max = 8 )$tot.withinss
+                })
+wss
+plot(1:k.max, wss,
+     type="b", pch = 19, frame = FALSE, 
+     xlab="Number of clusters K",
+     ylab="Ratio of within Cluster to between Cluster Variance")
+
+
+# Using optimal number of clusters, Run the analysis and add the cluster indicators.
+cluster_segments <- kmeans(seg_data_wip[,3:6],3)
+cluster_segments
+seg_data_wip$cluster <- cluster_segments$cluster
+
+write.csv(seg_data_wip, file = "C:\\Users\\mbeck\\Google Drive\\MAR 653\\Homework\\clustered_segments.csv")
+
+
+```
+
