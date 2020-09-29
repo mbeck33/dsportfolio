@@ -1,9 +1,7 @@
 ## Matthew A. Beck
 # Graduate Candidate @ Syracuse University, M.S., Applied Data Science
-
-3852368534
-
-mattbeck33@gmail.com
+SUID: [Will add upon Completion]
+MBECK07@SYR.EDU
 
 ## Description
 
