@@ -44,4 +44,4 @@ In my tenure as a student of the Applied Data Science program at Syracuse Univer
 
 6. [SlideDeck.pdf]([GH SLIDE DECK LINK - PDF])
     - Slides from recorded presentation
-    - [Public Link](https://docs.google.com/presentation/d/1bqwMwGoYIJwLUIqbyQqR9Gt7lUvXwEGusEO_b0gOHYM/edit?usp=sharing)
+    - [Public Link](POWERPOINT LINK VIA GOOGLE DRIVE)
