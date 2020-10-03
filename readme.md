@@ -23,7 +23,7 @@ In my tenure as a student of the Applied Data Science program at Syracuse Univer
 2. [MattABeckResume.pdf](GH [RESUME LINK])
     - Current Resume
 
-3. [MattABeckPortfolioMilestone.pdf]([GH REPORT LINK])
+3. [Portfolio_Milestone_Matthew_Beck.pdf](https://github.com/mbeck33/dsportfolio/blob/master/Portfolio_Milestone_Matthew_Beck.pdf)
     - Written Portfolio Milestone Report
 
 4. Referenced Course Projects and Assignments
