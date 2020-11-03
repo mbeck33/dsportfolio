@@ -21,7 +21,7 @@ In my tenure as a student of the Applied Data Science program at Syracuse Univer
 1. README.md 
     - Overview Document detailing repository contents
 
-2. [MattABeckResume.pdf](GH [RESUME LINK])
+2. [MattABeckResume.pdf](https://github.com/mbeck33/dsportfolio/blob/master/MatthewABeck_Resume_DeputyHeadBusinessIntelligence2020.pdf)
     - Current Resume
 
 3. [Portfolio_Milestone_Matthew_Beck.pdf](https://github.com/mbeck33/dsportfolio/blob/master/Portfolio_Milestone_Matthew_Beck.pdf)
