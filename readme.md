@@ -38,6 +38,5 @@ In my tenure as a student of the Applied Data Science program at Syracuse Univer
     - Video file presenting the Portfolio Milestone
     - [Link]([VIDEO LINK VIA GOOGLE DRIVE])
 
-6. [SlideDeck.pdf]([GH SLIDE DECK LINK - PDF])
+6. [SlideDeck.pdf](https://github.com/mbeck33/dsportfolio/blob/master/Matthew_Beck_Final_Portfolio_Presentation.pdf)
     - Slides from recorded presentation
-    - [Public Link](POWERPOINT LINK VIA GOOGLE DRIVE)
