@@ -34,9 +34,8 @@ In my tenure as a student of the Applied Data Science program at Syracuse Univer
     * [Hops and Hatha Image Recognition](https://github.com/mbeck33/dsportfolio/blob/master/BigDataAnalytics/IST-718%20Big%20Data%20Analytics%20-%20Final%20Project%20Presentation.pdf)
     * [State of Vaccination Rates in California School Districts Report](https://github.com/mbeck33/dsportfolio/blob/master/QuantitativeReasoningForDataScience/Final_Exam_Beck_Matthew.pdf)
   
-5. [Portfolio Presentation]([GH PRESENTATION LINK])
+5. [Portfolio Presentation](https://drive.google.com/file/d/1LEwZwThaQ38TmoFoKkEBCiNWB1kUOCN7/view?usp=sharing)
     - Video file presenting the Portfolio Milestone
-    - [Link]([VIDEO LINK VIA GOOGLE DRIVE])
 
 6. [SlideDeck.pdf](https://github.com/mbeck33/dsportfolio/blob/master/Matthew_Beck_Final_Portfolio_Presentation.pdf)
     - Slides from recorded presentation
